@@ -8,7 +8,8 @@ const userSignup = async(req,res,next)=>{
           console.log("Request received");
           var {username,email,password} = req.body;
           const curruser= await user.findOne({email:email});
-        if(curruser){
+          const usr = await user.findOne({username:username});
+        if(curruser || usr){
             res.status(400).json({'message':"This user already exists"});
         }
         else{
@@ -47,21 +48,28 @@ const userLogin = async(req,res,next)=>{
                 process.env.jwtSecret,
                 { expiresIn: expiresIn}
               );
-              const decoded = jwt.decode(token);
-              console.log("username:",decoded);
+              
               const jwtExpiresAt = new Date(Date.now() + expiresInToMilliseconds(expiresIn));
               curruser.jwtToken = token;
               curruser.jwtExpiresAt = jwtExpiresAt;
-              await curruser.save()
-              res.status(200).json({ token: token, user: curruser });            }
+              await curruser.save() ;
+              res.cookie("authtoken",token,{
+                expires:jwtExpiresAt,
+              });
+              res.status(200).json({ user: curruser});           
+             }
       }
       else{
         res.status(400).json({'message':"This user does not exists"}); 
 }
     }
-    catch(error){
-      res.status(501).json({'message':error});
+    catch(err){
+      console.error(err);
+      res.status(500).json({'message':err});
     }
 console.log("Login");
 }
+
+
+
 module.exports=({userLogin,userSignup});

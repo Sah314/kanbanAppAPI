@@ -1,7 +1,7 @@
 const express = require('express');
 //const { userLogin, userSignup } = require('../controllers/userController');
 const authenticate = require('../middlewares/authenticate')
-const {getboards,createnewBoard,movetask} = require('../controllers/boardcontroller')
+const {getboards,createnewBoard,movetask,addnewtask} = require('../controllers/boardcontroller')
 const router = express.Router();
 const boards = [
     {
@@ -18,7 +18,8 @@ const boards = [
 
 router.get('/',authenticate,getboards);
 router.post('/create',authenticate,createnewBoard);
-router.patch('/:boardid/tasks/:taskid/move',movetask);
+router.post('/addnewtask/:boardid',authenticate,addnewtask);
+router.patch('/:boardid/tasks/:taskid/move',authenticate,movetask);
 
 
 

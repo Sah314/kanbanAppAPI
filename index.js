@@ -5,7 +5,11 @@
     const cors = require('cors');
     const app  =express();
 
-    app.use(cors());
+    const corsOptions = {
+      origin: 'http://localhost:3000',
+      credentials: true, // Enable credentials (cookies)
+    };
+    app.use(cors(corsOptions));
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());
     async function startServer() {
