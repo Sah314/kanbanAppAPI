@@ -1,8 +1,8 @@
-const express = require('express');
+import { Router } from 'express';
 //const { userLogin, userSignup } = require('../controllers/userController');
-const authenticate = require('../middlewares/authenticate')
-const {getboards,createnewBoard,movetask,addnewtask} = require('../controllers/boardcontroller')
-const router = express.Router();
+import authenticate from '../middlewares/authenticate.js';
+import { getboards, createnewBoard, movetask, addnewtask, getABoard } from '../controllers/boardcontroller.js';
+const router = Router();
 const boards = [
     {
         userid:"Sahil_03",
@@ -17,10 +17,11 @@ const boards = [
 
 
 router.get('/',authenticate,getboards);
+router.get('/:boardId',authenticate,getABoard);
 router.post('/create',authenticate,createnewBoard);
-router.post('/addnewtask/:boardid',authenticate,addnewtask);
-router.patch('/:boardid/tasks/:taskid/move',authenticate,movetask);
+router.post('/addnewtask/:boardId',authenticate,addnewtask);
+router.patch('/:boardid/tasks/:taskId/move',authenticate,movetask);
 
 
 
-module.exports = router;
+export default router;

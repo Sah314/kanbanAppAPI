@@ -23,4 +23,4 @@ function expiresInToMilliseconds(expiresIn) {
     return value * multiplier;
   }
 
-  module.exports = expiresInToMilliseconds;
+  export default expiresInToMilliseconds;

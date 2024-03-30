@@ -1,6 +1,8 @@
-const jwt = require('jsonwebtoken');
-const user = require('../models/User');
-require("dotenv").config('.env');
+import jwt from 'jsonwebtoken';
+import user from '../models/User.js';
+import { config } from "dotenv";
+config(".env");
+
 
 const authenticate = async(req,res,next) => {
 const authHeader = req.headers['authorization']
@@ -9,14 +11,14 @@ if(token==null){
     return res.status(404).json({"message":"Token not found"})
 }
 const usertoken = await user.findOne({jwtToken:token});
-// console.log(usertoken);
-const validity = new Date(usertoken.jwtExpiresAt);
+// console.log(usertoken.jwtExpiresAt);
+// const validity = new Date(usertoken.jwtExpiresAt);
 
-if (validity <= new Date()) {
-  return res.status(401).json({ "message": "Token validity reached, please login again..." });
-}
+// if (validity <= new Date(Date.now())) {
+//   return res.status(401).json({ "message": "Token validity reached, please login again..." });
+// }
 
-jwt.verify(token,process.env.jwtSecret,(err,user)=>{
+    jwt.verify(token,process.env.jwtSecret,(err,user)=>{
     if(err) return res.status(403).json({"message":"Invalid token"});
     req.user=user;
     next();
@@ -24,4 +26,4 @@ jwt.verify(token,process.env.jwtSecret,(err,user)=>{
 
 }
 
-module.exports =authenticate;
+export default authenticate;

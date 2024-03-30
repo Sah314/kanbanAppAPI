@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const taskSchema = new mongoose.Schema({
+const taskSchema = new Schema({
     title:{
         type:String,
         required:true,
@@ -25,7 +25,7 @@ const taskSchema = new mongoose.Schema({
 })
 
 
-const boardSchema = new mongoose.Schema({
+const boardSchema = new Schema({
   title: {
     type: String,
     required: true,
@@ -47,5 +47,5 @@ const boardSchema = new mongoose.Schema({
     type:[taskSchema]
   }
 });
-const Board = mongoose.model('Board', boardSchema);
-module.exports = Board;
+const Board = model('Board', boardSchema);
+export default Board;

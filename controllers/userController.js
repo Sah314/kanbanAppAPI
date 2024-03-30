@@ -1,43 +1,49 @@
-const bcrypt = require('bcrypt');
-const user = require('../models/User');
-const expiresInToMilliseconds = require("../utils/millisecond")
-const jwt = require('jsonwebtoken');
-require("dotenv").config('.env');
-const userSignup = async(req,res,next)=>{
+import { genSaltSync, hashSync, compareSync } from 'bcrypt';
+import user from '../models/User.js';
+import logger from "../utils/logger.js"
+import expiresInToMilliseconds from "../utils/millisecond.js";
+import jwt from 'jsonwebtoken';
+import { config } from "dotenv";
+config(".env");
+
+export const userSignup = async(req,res,next)=>{
     try{
-          console.log("Request received");
           var {username,email,password} = req.body;
           const curruser= await user.findOne({email:email});
           const usr = await user.findOne({username:username});
         if(curruser || usr){
             res.status(400).json({'message':"This user already exists"});
+            logger.error("This user already exists")
         }
         else{
-            var salt=bcrypt.genSaltSync(10);
-            password = bcrypt.hashSync(password, salt);
+            var salt=genSaltSync(10);
+            password = hashSync(password, salt);
             const new_user = new user({
                 username :  username,
                 email  :  email ,
                 password:password,
             })
             await new_user.save();
-        res.status(201).json({"message":new_user})
+        res.status(201).json({"message":new_user.toObject()})
+        logger.info(new_user.toObject(),"Successful signup by")
       }
       }
       catch(error){
         res.status(501).json({'message':error});
+        logger.error(error,"Failed with error")
       }
-    console.log("Signup")
+  
 }
 
-const userLogin = async(req,res,next)=>{
+export const userLogin = async(req,res,next)=>{
     try{
         var {email,password} = req.body;
         const curruser= await user.findOne({email:email});
         console.log(curruser)
       if(curruser){
-        const passwordMatch = bcrypt.compareSync(password, curruser.password);
+        const passwordMatch = compareSync(password, curruser.password);
         if(!passwordMatch){
+          logger.warn("User is Unauthorized")
             res.status(401).json({"message":"Unauthorized"});
         }
         else{
@@ -49,11 +55,11 @@ const userLogin = async(req,res,next)=>{
                 { expiresIn: expiresIn}
               );
               
-              const jwtExpiresAt = new Date(Date.now() + expiresInToMilliseconds(expiresIn));
-              curruser.jwtToken = token;
-              curruser.jwtExpiresAt = jwtExpiresAt;
-              await curruser.save() ;
-              res.cookie("authtoken",token,{
+            const jwtExpiresAt = new Date(Date.now() + expiresInToMilliseconds(expiresIn));
+            curruser.jwtToken = token;
+            curruser.jwtExpiresAt = jwtExpiresAt;
+            await curruser.save() ;
+            res.cookie("authtoken",token,{
                 expires:jwtExpiresAt,
               });
               res.status(200).json({ user: curruser});           
@@ -69,7 +75,3 @@ const userLogin = async(req,res,next)=>{
     }
 console.log("Login");
 }
-
-
-
-module.exports=({userLogin,userSignup});

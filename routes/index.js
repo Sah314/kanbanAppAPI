@@ -1,9 +1,9 @@
-const express = require('express');
-const authRoutes = require('./authRoutes')
-const boardroutes = require('./boardroutes')
-const router = express.Router();
+import { Router } from 'express';
+import authRoutes from './authRoutes.js';
+import boardroutes from './boardroutes.js';
+const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/user', boardroutes);
 
-module.exports = router;
+export default router;

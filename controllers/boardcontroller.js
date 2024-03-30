@@ -1,6 +1,6 @@
-const kanban = require('../models/Kanbanboard');
-
-const createnewBoard = async(req,res)=>{
+import kanban from '../models/Kanbanboard.js';
+//Creating a new board
+export const createnewBoard = async(req,res)=>{
     const {title,description,todo} = req.body;
     const userId = req.user.userId;
     try {
@@ -23,8 +23,8 @@ const createnewBoard = async(req,res)=>{
     }
 }
 
-const getboards=async(req,res)=>{
-
+//Getting boards
+export const getboards=async(req,res)=>{
     try {
         const userId = req.user.userId;
        const board = await kanban.find({userid:userId});
@@ -45,13 +45,28 @@ const getboards=async(req,res)=>{
     // res.json(boards.filter(boards=>boards.userid==req.user.userId));
 }
 
-const movetask=async(req,res)=>{
-const {boardid,taskid} = req.params
-res.json({boardid,taskid});
-}
-const addnewtask=async(req,res)=>{
+export const getABoard = async(req,res)=>{
     try {
-        const boardid = req.params.boardid;
+        console.log("Getting board")
+         const id=req.params.boardId;
+         const userId = req.user.userId;
+         console.log(`boardid is ${id},userid is ${userId}`);
+         const board = await kanban.findOne({ _id: id, userid: userId });
+         if (!board ) {
+            throw Error('Invalid Id');
+         }
+         res.json(board);
+    } catch (error) {
+        console.log(error);
+    }
+}
+export const movetask=async(req,res)=>{
+const {boardId,taskId} = req.params
+res.json({boardId,taskId});
+}
+export const addnewtask=async(req,res)=>{
+    try {
+        const boardid = req.params.boardId;
         const userid = req.user.userId;
         const {title,description,duedate,labels,priority}=req.body;
                 if (!title||!duedate ){
@@ -83,4 +98,3 @@ const addnewtask=async(req,res)=>{
 
 }
 
-module.exports={getboards,createnewBoard,movetask,addnewtask};
