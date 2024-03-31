@@ -1,30 +1,31 @@
 import kanban from '../models/Kanbanboard.js';
+import task from '../models/task.js'
+import logger from '../utils/logger.js'
 //Creating a new board
-export const createnewBoard = async(req,res)=>{
-    const {title,description,todo} = req.body;
+export const createBoard = async(req,res)=>{
+    console.log("Here Here Here Here........");
+    const {title,description} = req.body;
     const userId = req.user.userId;
     try {
         if(!title){
            return res.status(400).json({"message":"Please enter a title"});
         }
         const newBoard = new kanban({
-            title:title,
-            description:description,
-            userid:userId,
-            todo:todo
-        })
+          title: title,
+          description: description,
+          user: userId,
+        });
         await newBoard.save();
-        console.log("Successful created new Board:",newBoard);
+        logger.info(newBoard.toObject(),"Successful created new Board");
         return  res.status(201).json({"message":newBoard})
 
     } catch (error) {
-        console.error(error);
+        logger.error(error,"Failed with error");
         res.status(501).json({"message":"Internal server error"});
     }
 }
-
 //Getting boards
-export const getboards=async(req,res)=>{
+export const getBoards=async(req,res)=>{
     try {
         const userId = req.user.userId;
        const board = await kanban.find({userid:userId});
@@ -45,7 +46,7 @@ export const getboards=async(req,res)=>{
     // res.json(boards.filter(boards=>boards.userid==req.user.userId));
 }
 
-export const getABoard = async(req,res)=>{
+export const getBoard = async(req,res)=>{
     try {
         console.log("Getting board")
          const id=req.params.boardId;
@@ -60,41 +61,54 @@ export const getABoard = async(req,res)=>{
         console.log(error);
     }
 }
-export const movetask=async(req,res)=>{
+
+export const moveTask=async(req,res)=>{
 const {boardId,taskId} = req.params
 res.json({boardId,taskId});
 }
-export const addnewtask=async(req,res)=>{
-    try {
-        const boardid = req.params.boardId;
-        const userid = req.user.userId;
-        const {title,description,duedate,labels,priority}=req.body;
-                if (!title||!duedate ){
-            return res.status(400).json({"message":"Title and duedate required!"});
-        }
-        const currboard = await kanban.find({userid:userid,_id:boardid});
-        if(!currboard){
-            return res.status(404).json({"message":"This kanban board doesn't exist"});
-        }
-        
-        const newTask = {
-            title:title,
-            description:description,
-            duedate:duedate,
-            labels:labels,
-            priority:priority
-        }
-        // currboard[0].todo.push(newTask);
-        const updatedBoard = await kanban.updateOne(
-            { _id: currboard[0]._id },
-            { $push: { 'todo': newTask } }
-          );       return res.status(201).json({updatedBoard});
-        
-    } 
-    catch (error) {
-        return res.status(501).json({"message":"Internal server Error"});
-    }
-   
 
-}
+export const createTask = async (req, res) => {
+  try {
+    const boardid = req.params.boardId;
+    const userId = req.user.userId;
+    const { title, description, labels, priority } = req.body;
+    if (!title) {
+      logger.error("Title required!");
+      return res.status(400).json({ message: "Title and duedate required!" });
+    }
+
+    const currboard = await kanban.find({_id:boardid}).populate('user');
+    if (!currboard) {
+      logger.error("Board doesn't exist");
+      return res
+        .status(404)
+        .json({ message: "This kanban board doesn't exist" });
+    }
+
+    const newTask = new task({
+      title: title,
+      description: description,
+      user: userId,
+      board: boardid,
+      duedate: Date.now(),
+      labels: labels,
+      priority: priority,
+    });
+
+    // currboard[0].todo.push(newTask);
+    await newTask.save();
+    console.log("Hello Hello......");
+
+    await kanban.updateOne(
+      { _id: currboard[0]._id },
+      { $push: { todo: newTask._id } }
+    );
+
+    logger.info(newTask.id, "Successfully created new Task with id: ");
+    return res.status(201).json({"message":"Created new task","id":newTask.id});
+  } catch (error) {
+    logger.error(error, "Failed due to this error");
+    return res.status(501).json({ message: "Internal server Error" });
+  }
+};
 

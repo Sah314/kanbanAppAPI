@@ -1,30 +1,5 @@
 import { Schema, model } from 'mongoose';
 
-const taskSchema = new Schema({
-    title:{
-        type:String,
-        required:true,
-    },
-    description:{
-        type:String
-    },
-    duedate:{
-      type:Date,
-      required:true
-    },
-    labels:{
-      type:[String]
-    },
-    priority:{
-      type:String
-    },
-    createdAt:{
-      type : Date ,
-      default:Date.now()
-    }
-})
-
-
 const boardSchema = new Schema({
   title: {
     type: String,
@@ -33,19 +8,26 @@ const boardSchema = new Schema({
   description: {
     type: String,
   },
-  userid:{
-    type:String,
-    required:true
+  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  backlog: {
+    type: [{ type: Schema.Types.ObjectId, ref: "Task" }],
   },
-  todo:{
-    type:[taskSchema]
+
+  inprogress: {
+    type: [{ type: Schema.Types.ObjectId, ref: "Task" }],
   },
-  inprogress:{
-    type:[taskSchema]
+  blocked: {
+    type: [{ type: Schema.Types.ObjectId, ref: "Task" }],
   },
-  finished:{
-    type:[taskSchema]
-  }
+  waiting: {
+    type: [{ type: Schema.Types.ObjectId, ref: "Task" }],
+  },
+
+  completed: {
+    type: [{ type: Schema.Types.ObjectId, ref: "Task" }],
+  },
 });
+
 const Board = model('Board', boardSchema);
+
 export default Board;

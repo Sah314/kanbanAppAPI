@@ -2,7 +2,6 @@ import { connections, disconnect as _disconnect, connect as _connect } from "mon
 import { config } from "dotenv";
 config({path:'.env'});  
 
-
 const connection = {};
 export async function connect() {
     if (connection.isConnected) {

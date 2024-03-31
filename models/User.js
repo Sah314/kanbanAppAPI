@@ -4,28 +4,25 @@ const userSchema = new Schema({
   username: {
     type: String,
     required: true,
-    unique:true
+    unique: true,
   },
   email: {
     type: String,
     required: true,
-    unique:true
+    unique: true,
   },
   password: {
     type: String,
-    required: true
+    required: true,
   },
-  boardids:{
-    type:Array,
-  },
-  jwtToken: {
-    type: String, // Store the JWT token here
-  },
-  jwtExpiresAt: {
-    type: Date, // Store the JWT expiration date here
-  },
-
+  boards: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Board",
+    },
+  ],
 });
+
 
 const User = model('User', userSchema);
 
